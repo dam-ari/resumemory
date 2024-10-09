@@ -305,4 +305,8 @@ TSWLatexianTemp*
 # Uncomment the next line to have this generated file ignored.
 #*Notes.bib
 
-resume.pdf
+# Ignore all PDF files
+*.pdf
+
+# Except resume.pdf in any branch-specific folder
+!*/**/resume.pdf
