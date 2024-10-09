@@ -1,0 +1,63 @@
+name: Build Resume
+
+# Trigger the workflow on any push to any branch
+on:
+  push:
+    branches:
+      - '**'
+    paths-ignore:
+      - '**/resume.pdf'  # Prevents the workflow from triggering on resume.pdf updates
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for accurate branch name
+
+      # Step 2: Set up Git for committing changes
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Step 3: Extract the branch name
+      - name: Get Branch Name
+        id: get_branch
+        run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      # Step 4: Install LaTeX and dependencies
+      - name: Install LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-full latexmk
+
+      # Step 5: Build LaTeX Resume
+      - name: Compile LaTeX Resume
+        run: |
+          latexmk -pdf -interaction=nonstopmode resume.tex
+          # Clean up auxiliary files (optional)
+          latexmk -c
+
+      # Step 6: Create a folder named after the branch and move resume.pdf into it
+      - name: Organize PDF
+        run: |
+          mkdir -p "$BRANCH_NAME"
+          mv resume.pdf "$BRANCH_NAME/resume.pdf"
+
+      # Step 7: Commit the generated PDF to the repository
+      - name: Commit PDF
+        run: |
+          git add "$BRANCH_NAME/resume.pdf"
+          git commit -m "Add resume.pdf to $BRANCH_NAME folder" || echo "No changes to commit"
+
+      # Step 8: Push the changes back to the repository
+      - name: Push Changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
