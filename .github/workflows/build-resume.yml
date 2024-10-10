@@ -7,7 +7,10 @@ on:
       - '**'
     paths-ignore:
       - '**/resume.pdf'  # Prevents the workflow from triggering on resume.pdf updates
-permissions: all
+permissions:
+  contents: write      # Required to push changes to the repository
+  packages: write      # Required to create releases and upload assets
+  actions: read        # Allows the workflow to read metadata
 
 jobs:
   build:
