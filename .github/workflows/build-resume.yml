@@ -7,6 +7,7 @@ on:
       - '**'
     paths-ignore:
       - '**/resume.pdf'  # Prevents the workflow from triggering on resume.pdf updates
+permissions: all
 
 jobs:
   build:
